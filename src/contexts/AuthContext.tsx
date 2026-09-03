@@ -37,6 +37,7 @@ interface AuthCtx {
   profile: OrgProfile;
   login: (email: string, _password: string) => Promise<User>;
   signup: (data: { email: string; password: string; name: string; organization: string; role?: Role }) => Promise<User>;
+  resetPassword: (email: string) => Promise<void>;
   logout: () => void;
   updateProfile: (patch: Partial<OrgProfile>) => Promise<void>;
   profileCompletion: number;
@@ -107,11 +108,20 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       if (!result.session) {
         throw new Error("Account created. Check your email to confirm your account, then sign in.");
       }
+
       setUser(next);
       setProfile(p => ({ ...p, legalName: data.organization }));
       return next;
     }
     throw new Error("Authentication is not configured. Add the Supabase environment variables and try again.");
+  }
+
+  async function resetPassword(email: string) {
+    if (!supabase) throw new Error("Authentication is not configured.");
+    const { error } = await supabase.auth.resetPasswordForEmail(email, {
+      redirectTo: `${window.location.origin}/auth?mode=reset`,
+    });
+    if (error) throw error;
   }
 
   async function logout() {
@@ -135,7 +145,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const arrayBonus = (profile.diversityStatus.length > 0 ? 1 : 0) + (profile.certifications.length > 0 ? 1 : 0);
   const profileCompletion = Math.round(((filled + arrayBonus) / (fields.length + 2)) * 100);
 
-  return <Ctx.Provider value={{ user, profile, login, signup, logout, updateProfile, profileCompletion }}>{children}</Ctx.Provider>;
+  return <Ctx.Provider value={{ user, profile, login, signup, resetPassword, logout, updateProfile, profileCompletion }}>{children}</Ctx.Provider>;
 }
 export const useAuth = () => useContext(Ctx)!;
 
