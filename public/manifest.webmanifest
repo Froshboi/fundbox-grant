@@ -1,0 +1,13 @@
+{
+  "name": "Fundbox Grants",
+  "short_name": "Fundbox",
+  "description": "Grant discovery and application management platform.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#0f855c",
+  "icons": [
+    { "src": "/icon-192.png", "sizes": "192x192", "type": "image/png" },
+    { "src": "/icon-512.png", "sizes": "512x512", "type": "image/png" }
+  ]
+}
