@@ -1,7 +1,7 @@
 import { NavLink, Outlet, Navigate } from "react-router-dom";
 import { Header } from "./Header";
 import { useAuth } from "@/contexts/AuthContext";
-import { BarChart3, FileCheck, Files, Newspaper, ScrollText, Settings, Users, Wallet } from "lucide-react";
+import { BarChart3, FileCheck, Files, Newspaper, ScrollText, Settings, Users, Wallet, MessageSquare } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 const items = [
@@ -13,6 +13,7 @@ const items = [
   { to: "/admin/documents", label: "Documents", icon: Files },
   { to: "/admin/audit", label: "Audit Logs", icon: ScrollText },
   { to: "/admin/settings", label: "Settings", icon: Settings },
+  { to: "/admin/support", label: "Support Inbox", icon: MessageSquare },
 ];
 
 export function AdminLayout() {
@@ -22,14 +23,14 @@ export function AdminLayout() {
   return (
     <div className="min-h-screen flex flex-col bg-ink-50 dark:bg-ink-950">
       <Header />
-      <div className="container-page py-6 flex-1 grid gap-6 md:grid-cols-[240px_1fr]">
+      <div className="container-page py-4 sm:py-6 flex-1 grid gap-4 sm:gap-6 md:grid-cols-[240px_1fr]">
         <aside className="md:sticky md:top-20 h-max">
           <div className="card p-3 mb-3">
             <div className="text-xs muted">Signed in as</div>
             <div className="font-semibold text-sm">{user.name}</div>
             <div className="chip bg-brand-100 text-brand-800 dark:bg-brand-600/20 dark:text-brand-300 mt-1">Administrator</div>
           </div>
-          <nav className="card p-2 space-y-0.5">
+          <nav className="card p-2 space-y-0.5 max-h-[45vh] overflow-y-auto md:max-h-none">
             {items.map(i => (
               <NavLink key={i.to} to={i.to} end={i.end}
                 className={({ isActive }) => cn(

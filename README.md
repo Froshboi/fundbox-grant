@@ -1,8 +1,8 @@
 # Fundbox Grants — US Grant Discovery & Management Platform
 
-A production-quality demo of **Fundbox Grants Ltd**, a US-focused grant discovery, application management, and funding assistance platform for small businesses, startups, nonprofits, women-owned, minority-owned, veteran, and educational organizations.
+A production-quality **Fundbox Grants Ltd** grant discovery, application management, and funding assistance platform.
 
-> This is a fully self-contained SPA. No backend is required to run the demo — data is stored in `localStorage`. See "Wiring a real backend" below for production notes.
+> Production authentication, support messaging, and document storage are provided by Supabase.
 
 ## Tech Stack
 
@@ -43,15 +43,6 @@ vercel --prod # deploy to production
 
 The included `vercel.json` handles SPA client-side routing (all paths fall back to `index.html`).
 
-## Demo Accounts
-
-Any password is accepted in demo mode.
-
-| Role      | Email                          |
-| --------- | ------------------------------ |
-| Applicant | `demo@fundboxgrants.com`       |
-| Admin     | `admin@fundboxgrants.com`      |
-
 ## Feature Map
 
 | Area                  | Route                             | Notes                                                   |
@@ -59,7 +50,7 @@ Any password is accepted in demo mode.
 | Landing               | `/`                               | Hero, trust indicators, categories, CTAs                |
 | Grant Marketplace     | `/grants`                         | 30 realistic US grants, filters, search, sort, bookmark |
 | Grant Details         | `/grants/:id`                     | Overview, eligibility, timeline, FAQ, similar grants    |
-| Auth                  | `/auth`                           | Sign in / Sign up (mock)                                |
+| Auth                  | `/auth`                           | Supabase Auth                                             |
 | Applicant Dashboard   | `/dashboard`                      | Overview, widgets, profile completion                   |
 | Saved Grants          | `/dashboard/saved`                | Bookmarks                                               |
 | Applications          | `/dashboard/applications`         | Full status pipeline                                    |
@@ -101,7 +92,7 @@ src/
 
 ## Wiring a Real Backend
 
-The demo uses `localStorage`. For production, replace the following:
+The application currently uses `localStorage` for non-authenticated UI preferences. For production, replace the following:
 
 | Context                                | Replace with                                   |
 | -------------------------------------- | ---------------------------------------------- |
@@ -110,14 +101,25 @@ The demo uses `localStorage`. For production, replace the following:
 | `BookmarkContext`                      | `user_bookmarks` table (RLS)                   |
 | `NotificationContext`                  | WebSocket + `notifications` table + web-push   |
 | `data/grants.ts`, `articles.ts`, etc.  | CMS or database seed                           |
-| Document Vault                         | S3 / Supabase Storage / R2                     |
+| Document Vault                         | Supabase Storage bucket named `documents`      |
 
 The design system, routing, and components are backend-agnostic.
 
+## Production setup
+
+1. Create a Supabase project and enable Email authentication.
+2. Run [`supabase/schema.sql`](C:/Users/HP/Desktop/fundbox-grants.worktrees/full-functionality-auth-upload-ai/supabase/schema.sql) in the Supabase SQL Editor. It creates the private bucket, document metadata table, and RLS policies.
+3. Add `VITE_SUPABASE_URL` and `VITE_SUPABASE_ANON_KEY` from `.env.example` to your deployment environment.
+4. In Supabase Auth settings, configure your production Site URL and redirect URLs, and choose whether email confirmation is required.
+5. Set an admin user's `app_metadata.role` to `admin` from a trusted server or Supabase dashboard; never let the browser assign admin roles.
+6. The support inbox is available at `/admin/support`; the Support page lets authenticated customers open tickets and chat with your team. The SQL migration enables Realtime for both tables.
+
+The AI Matches screen uses a deterministic, explainable ranking algorithm over the organization profile, grant eligibility, category, tags, and location. Replace `src/lib/matching.ts` with a server-side model call when generative recommendations are needed; never expose a provider API key in the browser.
+
 ## Legal & Operational Context (US)
 
-Fundbox Grants Ltd is designed as a **grant discovery and application management platform**, not a financial institution. Depending on the operating model chosen (marketplace, consulting, or grant administration), the company may need to comply with state business registration, US privacy laws (CCPA/CPRA, VCDPA, etc.), applicant verification procedures, and AML/KYC processes if funds are handled directly. See `src/pages/legal/` for the customer-facing document set included with the demo.
+Fundbox Grants Ltd is designed as a **grant discovery and application management platform**, not a financial institution. Depending on the operating model chosen (marketplace, consulting, or grant administration), the company may need to comply with state business registration, US privacy laws (CCPA/CPRA, VCDPA, etc.), applicant verification procedures, and AML/KYC processes if funds are handled directly. See `src/pages/legal/` for the customer-facing document set.
 
 ---
 
-© Fundbox Grants Ltd. Demo project.
+© Fundbox Grants Ltd.

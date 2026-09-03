@@ -20,9 +20,9 @@ export function DashboardLayout() {
   return (
     <div className="min-h-screen flex flex-col bg-ink-50 dark:bg-ink-950">
       <Header />
-      <div className="container-page py-6 flex-1 grid gap-6 md:grid-cols-[240px_1fr]">
+      <div className="container-page py-4 sm:py-6 flex-1 grid gap-4 sm:gap-6 md:grid-cols-[240px_1fr]">
         <aside className="md:sticky md:top-20 h-max">
-          <nav className="card p-2 space-y-0.5">
+          <nav className="card p-2 space-y-0.5 max-h-[45vh] overflow-y-auto md:max-h-none">
             {items.map(i => (
               <NavLink key={i.to} to={i.to} end={i.end}
                 className={({ isActive }) => cn(

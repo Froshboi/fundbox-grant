@@ -1,4 +1,4 @@
-import { FormEvent } from "react";
+import { FormEvent, useState } from "react";
 import { useAuth } from "@/contexts/AuthContext";
 
 const industries = ["Technology", "Manufacturing", "Retail", "Food & Beverage", "Healthcare", "Education", "Nonprofit", "Professional Services", "Clean Energy", "Agriculture"];
@@ -11,11 +11,14 @@ const certOptions = ["WBENC", "MBE", "VOSB", "SDVOSB", "8(a)", "HUBZone", "DBE"]
 
 export default function Profile() {
   const { profile, updateProfile, profileCompletion, user } = useAuth();
+  const [saved, setSaved] = useState<string | null>(null);
 
-  function onSubmit(e: FormEvent<HTMLFormElement>) {
+  async function onSubmit(e: FormEvent<HTMLFormElement>) {
     e.preventDefault();
+    setSaved(null);
     const fd = new FormData(e.currentTarget);
-    updateProfile({
+    try {
+      await updateProfile({
       legalName: String(fd.get("legalName") || ""),
       ein: String(fd.get("ein") || ""),
       industry: String(fd.get("industry") || ""),
@@ -28,7 +31,11 @@ export default function Profile() {
       mission: String(fd.get("mission") || ""),
       diversityStatus: diversityOptions.filter(o => fd.get("div_" + o) === "on"),
       certifications: certOptions.filter(o => fd.get("cert_" + o) === "on"),
-    });
+      });
+      setSaved("Profile saved.");
+    } catch (error) {
+      setSaved(error instanceof Error ? error.message : "Could not save profile.");
+    }
   }
 
   return (
@@ -109,6 +116,7 @@ export default function Profile() {
         </div>
 
         <div className="md:col-span-2 flex justify-end">
+          {saved && <div className="text-sm muted mr-4 self-center">{saved}</div>}
           <button className="btn-primary">Save profile</button>
         </div>
       </form>

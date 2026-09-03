@@ -1,7 +1,8 @@
-import { FormEvent, useState } from "react";
+import { FormEvent, useEffect, useState } from "react";
 import { Link, Navigate, useNavigate, useSearchParams } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { Logo } from "@/components/layout/Logo";
+import { checkSupabaseConnection, isSupabaseConfigured } from "@/lib/supabase";
 
 export default function Auth() {
   const [params] = useSearchParams();
@@ -9,7 +10,14 @@ export default function Auth() {
   const { user, login, signup } = useAuth();
   const [loading, setLoading] = useState(false);
   const [err, setErr] = useState<string | null>(null);
+  const [connection, setConnection] = useState("Checking Supabase connection...");
   const nav = useNavigate();
+
+  useEffect(() => {
+    checkSupabaseConnection()
+      .then(setConnection)
+      .catch(error => setConnection(error instanceof Error ? `Supabase connection failed: ${error.message}` : "Supabase connection failed."));
+  }, []);
 
   if (user) return <Navigate to="/dashboard" replace />;
 
@@ -71,11 +79,11 @@ export default function Auth() {
             )}
             <div>
               <label className="label">Email</label>
-              <input required type="email" name="email" className="input" defaultValue={mode === "signin" ? "demo@fundboxgrants.com" : ""} placeholder="you@company.com" />
+              <input required type="email" name="email" className="input" placeholder="you@company.com" />
             </div>
             <div>
               <label className="label">Password</label>
-              <input required type="password" name="password" className="input" defaultValue={mode === "signin" ? "demo1234" : ""} placeholder="••••••••" />
+              <input required minLength={8} type="password" name="password" className="input" placeholder="8+ characters" />
             </div>
             {err && <div className="text-sm text-red-600">{err}</div>}
             <button className="btn-primary w-full" disabled={loading}>
@@ -90,10 +98,12 @@ export default function Auth() {
             )}
           </div>
           <div className="mt-8 p-4 rounded-lg bg-ink-50 dark:bg-ink-900 text-xs">
-            <div className="font-semibold mb-1">Demo accounts</div>
-            <div>Applicant: <code>demo@fundboxgrants.com</code></div>
-            <div>Admin: <code>admin@fundboxgrants.com</code></div>
-            <div className="muted mt-1">Any password works in demo mode.</div>
+            <div className="font-semibold mb-1">{isSupabaseConfigured ? "Secure authentication enabled" : "Local development mode"}</div>
+            {isSupabaseConfigured ? (
+              <div className={connection.startsWith("Connected") ? "text-emerald-600" : "text-red-600"}>{connection} Email verification may be required.</div>
+            ) : (
+              <div className="muted">Authentication is unavailable until VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY are configured.</div>
+            )}
           </div>
           <div className="text-xs muted mt-6">
             By continuing you agree to our <Link to="/legal/terms" className="link">Terms</Link> and <Link to="/legal/privacy" className="link">Privacy Policy</Link>.

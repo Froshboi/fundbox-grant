@@ -3,11 +3,12 @@ import { Sparkles } from "lucide-react";
 import { GRANTS } from "@/data/grants";
 import { useAuth } from "@/contexts/AuthContext";
 import { formatCurrency } from "@/lib/utils";
+import { rankGrantMatches } from "@/lib/matching";
 
 export default function Matches() {
   const { profile, profileCompletion } = useAuth();
   const orgName = profile.legalName || "your organization";
-  const top = [...GRANTS].sort((a, b) => b.matchPercentage - a.matchPercentage).slice(0, 8);
+  const top = rankGrantMatches(GRANTS, profile).slice(0, 8);
 
   return (
     <div className="space-y-6">
@@ -27,15 +28,15 @@ export default function Matches() {
       </div>
 
       <div className="space-y-3">
-        {top.map(g => (
+        {top.map(({ grant: g, score, reasons }) => (
           <Link key={g.id} to={`/grants/${g.id}`} className="card p-5 flex items-center gap-4 hover:shadow-pop transition">
             <div className="w-14 text-center">
-              <div className="font-display text-xl font-bold text-brand-600 dark:text-brand-400">{g.matchPercentage}%</div>
+              <div className="font-display text-xl font-bold text-brand-600 dark:text-brand-400">{score}%</div>
               <div className="text-[10px] uppercase muted">match</div>
             </div>
             <div className="min-w-0 flex-1">
               <div className="font-semibold">{g.title}</div>
-              <div className="text-sm muted">"{orgName} matches strongly on {g.category.toLowerCase()} eligibility, funding stage, and geographic scope."</div>
+              <div className="text-sm muted">"{orgName} matches strongly: {reasons.join(" ")}</div>
             </div>
             <div className="text-right">
               <div className="font-medium">{formatCurrency(g.fundingAmount)}</div>

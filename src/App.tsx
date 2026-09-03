@@ -30,6 +30,7 @@ import AdminContent from "./pages/admin/Content";
 import AdminDocuments from "./pages/admin/Documents";
 import AdminAudit from "./pages/admin/Audit";
 import AdminSettings from "./pages/admin/Settings";
+import AdminSupport from "./pages/admin/Support";
 
 import Terms from "./pages/legal/Terms";
 import Privacy from "./pages/legal/Privacy";
@@ -76,6 +77,7 @@ export default function App() {
           <Route path="documents" element={<AdminDocuments />} />
           <Route path="audit" element={<AdminAudit />} />
           <Route path="settings" element={<AdminSettings />} />
+          <Route path="support" element={<AdminSupport />} />
         </Route>
 
         <Route path="/404" element={<NotFound />} />
