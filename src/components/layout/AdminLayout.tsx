@@ -14,6 +14,7 @@ const items = [
   { to: "/admin/audit", label: "Audit Logs", icon: ScrollText },
   { to: "/admin/settings", label: "Settings", icon: Settings },
   { to: "/admin/support", label: "Support Inbox", icon: MessageSquare },
+  { to: "/admin/funding", label: "Funding", icon: Wallet },
 ];
 
 export function AdminLayout() {

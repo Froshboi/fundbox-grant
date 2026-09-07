@@ -1,7 +1,7 @@
 import { NavLink, Outlet, Navigate } from "react-router-dom";
 import { Header } from "./Header";
 import { useAuth } from "@/contexts/AuthContext";
-import { Bookmark, FileText, Folder, LayoutDashboard, Bell, User, Sparkles } from "lucide-react";
+import { Bookmark, FileText, Folder, LayoutDashboard, Bell, User, Sparkles, Wallet } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 const items = [
@@ -12,6 +12,7 @@ const items = [
   { to: "/dashboard/documents", label: "Document Vault", icon: Folder },
   { to: "/dashboard/notifications", label: "Notifications", icon: Bell },
   { to: "/dashboard/profile", label: "Profile", icon: User },
+  { to: "/dashboard/funding", label: "Funding", icon: Wallet },
 ];
 
 export function DashboardLayout() {

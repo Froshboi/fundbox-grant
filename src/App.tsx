@@ -21,6 +21,7 @@ import Matches from "./pages/dashboard/Matches";
 import Documents from "./pages/dashboard/Documents";
 import Notifications from "./pages/dashboard/Notifications";
 import Profile from "./pages/dashboard/Profile";
+import Funding from "./pages/dashboard/Funding";
 
 import AdminAnalytics from "./pages/admin/Analytics";
 import AdminApplicants from "./pages/admin/Applicants";
@@ -31,6 +32,7 @@ import AdminDocuments from "./pages/admin/Documents";
 import AdminAudit from "./pages/admin/Audit";
 import AdminSettings from "./pages/admin/Settings";
 import AdminSupport from "./pages/admin/Support";
+import AdminFunding from "./pages/admin/Funding";
 
 import Terms from "./pages/legal/Terms";
 import Privacy from "./pages/legal/Privacy";
@@ -66,6 +68,7 @@ export default function App() {
           <Route path="documents" element={<Documents />} />
           <Route path="notifications" element={<Notifications />} />
           <Route path="profile" element={<Profile />} />
+          <Route path="funding" element={<Funding />} />
         </Route>
 
         <Route path="/admin" element={<AdminLayout />}>
@@ -78,6 +81,7 @@ export default function App() {
           <Route path="audit" element={<AdminAudit />} />
           <Route path="settings" element={<AdminSettings />} />
           <Route path="support" element={<AdminSupport />} />
+          <Route path="funding" element={<AdminFunding />} />
         </Route>
 
         <Route path="/404" element={<NotFound />} />

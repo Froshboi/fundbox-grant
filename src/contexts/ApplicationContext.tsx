@@ -1,4 +1,6 @@
 import { createContext, useContext, useEffect, useState, type ReactNode } from "react";
+import { useAuth } from "@/contexts/AuthContext";
+import { supabase } from "@/lib/supabase";
 
 export type AppStatus = "Draft" | "Submitted" | "In Review" | "Additional Information Required" | "Approved" | "Declined";
 
@@ -13,34 +15,44 @@ export interface Application {
   notes?: string;
 }
 
-const KEY = "fb-apps";
-const seed: Application[] = [
-  { id: "app-001", grantId: "grant-002", grantTitle: "Women-Owned Business Expansion Grant", status: "In Review", submittedAt: new Date(Date.now() - 8 * 86400e3).toISOString(), updatedAt: new Date(Date.now() - 2 * 86400e3).toISOString(), amountRequested: 25000 },
-  { id: "app-002", grantId: "grant-006", grantTitle: "Technology Innovation Grant (SBIR Phase I)", status: "Draft", submittedAt: null, updatedAt: new Date(Date.now() - 1 * 86400e3).toISOString(), amountRequested: 275000 },
-  { id: "app-003", grantId: "grant-001", grantTitle: "SBA Growth Accelerator Grant", status: "Submitted", submittedAt: new Date(Date.now() - 3 * 86400e3).toISOString(), updatedAt: new Date(Date.now() - 3 * 86400e3).toISOString(), amountRequested: 50000 },
-  { id: "app-004", grantId: "grant-008", grantTitle: "Nonprofit Capacity Building Grant", status: "Additional Information Required", submittedAt: new Date(Date.now() - 20 * 86400e3).toISOString(), updatedAt: new Date(Date.now() - 4 * 86400e3).toISOString(), amountRequested: 150000, notes: "Please provide updated board roster and FY2024 audited financials." },
-  { id: "app-005", grantId: "grant-011", grantTitle: "Amber Grant for Women", status: "Approved", submittedAt: new Date(Date.now() - 60 * 86400e3).toISOString(), updatedAt: new Date(Date.now() - 5 * 86400e3).toISOString(), amountRequested: 10000 },
-];
-
 interface Ctx {
   apps: Application[];
-  update: (id: string, patch: Partial<Application>) => void;
-  add: (a: Omit<Application, "id" | "updatedAt">) => void;
+  update: (id: string, patch: Partial<Application>) => Promise<void>;
+  add: (a: Omit<Application, "id" | "updatedAt">) => Promise<void>;
 }
 const C = createContext<Ctx | null>(null);
 
 export function ApplicationProvider({ children }: { children: ReactNode }) {
-  const [apps, setApps] = useState<Application[]>(() => {
-    const raw = typeof window !== "undefined" ? localStorage.getItem(KEY) : null;
-    return raw ? JSON.parse(raw) : seed;
-  });
-  useEffect(() => { localStorage.setItem(KEY, JSON.stringify(apps)); }, [apps]);
+  const { user } = useAuth();
+  const [apps, setApps] = useState<Application[]>([]);
+  useEffect(() => {
+    if (!supabase || !user) { setApps([]); return; }
+    supabase.from("applications").select("*").eq("user_id", user.id).order("updated_at", { ascending: false })
+      .then(({ data }) => setApps((data ?? []).map(row => ({
+        id: row.id, grantId: row.grant_id, grantTitle: row.grant_title, status: row.status,
+        submittedAt: row.submitted_at, updatedAt: row.updated_at, amountRequested: row.amount_requested, notes: row.notes,
+      }))));
+  }, [user]);
   return <C.Provider value={{
     apps,
-    update: (id: string, patch: Partial<Application>) =>
-      setApps(a => a.map(x => x.id === id ? { ...x, ...patch, updatedAt: new Date().toISOString() } : x)),
-    add: (a: Omit<Application, "id" | "updatedAt">) =>
-      setApps(prev => [{ ...a, id: "app-" + Math.random().toString(36).slice(2, 6), updatedAt: new Date().toISOString() }, ...prev]),
+    update: async (id: string, patch: Partial<Application>) => {
+      if (!supabase || !user) return;
+      const { error } = await supabase.from("applications").update({
+        status: patch.status, notes: patch.notes, amount_requested: patch.amountRequested,
+        submitted_at: patch.submittedAt, updated_at: new Date().toISOString(),
+      }).eq("id", id).eq("user_id", user.id);
+      if (error) throw error;
+      setApps(current => current.map(x => x.id === id ? { ...x, ...patch, updatedAt: new Date().toISOString() } : x));
+    },
+    add: async (a: Omit<Application, "id" | "updatedAt">) => {
+      if (!supabase || !user) return;
+      const { data, error } = await supabase.from("applications").insert({
+        user_id: user.id, grant_id: a.grantId, grant_title: a.grantTitle, status: a.status,
+        submitted_at: a.submittedAt, amount_requested: a.amountRequested, notes: a.notes,
+      }).select().single();
+      if (error) throw error;
+      if (data) setApps(prev => [{ ...a, id: data.id, updatedAt: data.updated_at }, ...prev]);
+    },
   }}>{children}</C.Provider>;
 }
 

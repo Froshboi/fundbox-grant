@@ -3,6 +3,120 @@
 
 create extension if not exists "pgcrypto";
 
+create or replace function public.is_support_admin()
+returns boolean language sql stable security definer set search_path = public
+as $$ select coalesce((auth.jwt() -> 'app_metadata' ->> 'role') = 'admin', false) $$;
+
+create table if not exists public.applications (
+  id uuid primary key default gen_random_uuid(),
+  user_id uuid not null references auth.users(id) on delete cascade,
+  grant_id text not null,
+  grant_title text not null,
+  status text not null default 'Draft' check (status in ('Draft','Submitted','In Review','Additional Information Required','Approved','Declined')),
+  submitted_at timestamptz,
+  updated_at timestamptz not null default now(),
+  amount_requested numeric(12,2) not null default 0,
+  notes text
+);
+alter table public.applications enable row level security;
+drop policy if exists "Users read own applications" on public.applications;
+create policy "Users read own applications" on public.applications for select to authenticated using (user_id = auth.uid() or public.is_support_admin());
+drop policy if exists "Users create own applications" on public.applications;
+create policy "Users create own applications" on public.applications for insert to authenticated with check (user_id = auth.uid());
+drop policy if exists "Admins manage applications" on public.applications;
+create policy "Admins manage applications" on public.applications for update to authenticated using (public.is_support_admin()) with check (public.is_support_admin());
+
+create table if not exists public.user_bookmarks (
+  user_id uuid not null references auth.users(id) on delete cascade,
+  grant_id text not null,
+  created_at timestamptz not null default now(),
+  primary key (user_id, grant_id)
+);
+alter table public.user_bookmarks enable row level security;
+drop policy if exists "Users manage own bookmarks" on public.user_bookmarks;
+create policy "Users manage own bookmarks" on public.user_bookmarks for all to authenticated using (user_id = auth.uid()) with check (user_id = auth.uid());
+
+create table if not exists public.wallets (
+  user_id uuid primary key references auth.users(id) on delete cascade,
+  balance numeric(12,2) not null default 0 check (balance >= 0),
+  updated_at timestamptz not null default now()
+);
+create table if not exists public.wallet_transactions (
+  id uuid primary key default gen_random_uuid(),
+  user_id uuid not null references auth.users(id) on delete cascade,
+  amount numeric(12,2) not null check (amount <> 0),
+  kind text not null check (kind in ('credit','debit','withdrawal')),
+  memo text not null,
+  created_by uuid references auth.users(id),
+  created_at timestamptz not null default now()
+);
+create table if not exists public.payout_accounts (
+  user_id uuid primary key references auth.users(id) on delete cascade,
+  provider text not null default 'pending_provider_setup',
+  provider_account_id text,
+  bank_name text,
+  account_last4 text not null check (account_last4 ~ '^[0-9]{4}$'),
+  status text not null default 'Pending' check (status in ('Pending','Approved','Rejected')),
+  created_at timestamptz not null default now(),
+  updated_at timestamptz not null default now()
+);
+create table if not exists public.withdrawal_requests (
+  id uuid primary key default gen_random_uuid(),
+  user_id uuid not null references auth.users(id) on delete cascade,
+  amount numeric(12,2) not null check (amount > 0),
+  status text not null default 'Pending' check (status in ('Pending','Approved','Rejected','Paid')),
+  payout_account_last4 text not null,
+  admin_note text,
+  created_at timestamptz not null default now(),
+  reviewed_at timestamptz,
+  reviewed_by uuid references auth.users(id)
+);
+alter table public.wallets enable row level security;
+alter table public.wallet_transactions enable row level security;
+alter table public.payout_accounts enable row level security;
+alter table public.withdrawal_requests enable row level security;
+create policy "Users read own wallet" on public.wallets for select to authenticated using (user_id = auth.uid() or public.is_support_admin());
+create policy "Admins manage wallets" on public.wallets for all to authenticated using (public.is_support_admin()) with check (public.is_support_admin());
+create policy "Users read own transactions" on public.wallet_transactions for select to authenticated using (user_id = auth.uid() or public.is_support_admin());
+create policy "Admins create transactions" on public.wallet_transactions for insert to authenticated with check (public.is_support_admin());
+create policy "Users manage own payout account" on public.payout_accounts for select to authenticated using (user_id = auth.uid() or public.is_support_admin());
+create policy "Users create own payout account" on public.payout_accounts for insert to authenticated with check (user_id = auth.uid());
+create policy "Admins update payout account" on public.payout_accounts for update to authenticated using (public.is_support_admin()) with check (public.is_support_admin());
+create policy "Users read/create withdrawals" on public.withdrawal_requests for select to authenticated using (user_id = auth.uid() or public.is_support_admin());
+create policy "Users create withdrawals" on public.withdrawal_requests for insert to authenticated with check (user_id = auth.uid());
+create policy "Admins manage withdrawals" on public.withdrawal_requests for update to authenticated using (public.is_support_admin()) with check (public.is_support_admin());
+
+create or replace function public.admin_adjust_balance(target_user uuid, adjustment numeric, transaction_memo text)
+returns public.wallets language plpgsql security definer set search_path = public
+as $$
+declare result public.wallets;
+begin
+  if not public.is_support_admin() or adjustment = 0 then raise exception 'Not authorized or invalid adjustment'; end if;
+  insert into public.wallets (user_id, balance) values (target_user, 0) on conflict (user_id) do nothing;
+  update public.wallets set balance = balance + adjustment, updated_at = now()
+    where user_id = target_user and balance + adjustment >= 0 returning * into result;
+  if result.user_id is null then raise exception 'Insufficient balance or unknown user'; end if;
+  insert into public.wallet_transactions (user_id, amount, kind, memo, created_by)
+    values (target_user, adjustment, case when adjustment > 0 then 'credit' else 'debit' end, transaction_memo, auth.uid());
+  return result;
+end;
+$$;
+
+create or replace function public.admin_review_withdrawal(request_id uuid, decision text, note text default null)
+returns public.withdrawal_requests language plpgsql security definer set search_path = public
+as $$
+declare request public.withdrawal_requests; result public.withdrawal_requests;
+begin
+  if not public.is_support_admin() or decision not in ('Approved','Rejected','Paid') then raise exception 'Not authorized or invalid decision'; end if;
+  select * into request from public.withdrawal_requests where id = request_id for update;
+  if request.id is null or request.status <> 'Pending' then raise exception 'Withdrawal is not pending'; end if;
+  if decision in ('Approved','Paid') then perform public.admin_adjust_balance(request.user_id, -request.amount, 'Withdrawal approved'); end if;
+  update public.withdrawal_requests set status = decision, admin_note = note, reviewed_at = now(), reviewed_by = auth.uid()
+    where id = request_id returning * into result;
+  return result;
+end;
+$$;
+
 create table if not exists public.notifications (
   id uuid primary key default gen_random_uuid(),
   user_id uuid not null references auth.users(id) on delete cascade,

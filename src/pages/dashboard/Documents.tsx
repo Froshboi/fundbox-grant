@@ -11,12 +11,6 @@ const requiredDocs = [
 ];
 
 const KEY = "fb-docs";
-const seed: Doc[] = [
-  { id: "d1", name: "articles_of_incorporation_2019.pdf", type: "Articles of Incorporation", size: "482 KB", uploadedAt: new Date(Date.now() - 40 * 86400e3).toISOString() },
-  { id: "d2", name: "ein_letter.pdf", type: "IRS Determination Letter", size: "112 KB", uploadedAt: new Date(Date.now() - 40 * 86400e3).toISOString() },
-  { id: "d3", name: "fy2024_financials.xlsx", type: "Financial Statements", size: "1.2 MB", uploadedAt: new Date(Date.now() - 8 * 86400e3).toISOString() },
-];
-
 export default function Documents() {
   const { user } = useAuth();
   const storageKey = `${KEY}-${user?.id ?? "anonymous"}`;
@@ -24,7 +18,7 @@ export default function Documents() {
   const [message, setMessage] = useState<string | null>(null);
   const [docs, setDocs] = useState<Doc[]>(() => {
     const raw = typeof window !== "undefined" ? localStorage.getItem(storageKey) : null;
-    return raw ? JSON.parse(raw) : seed;
+    return raw ? JSON.parse(raw) : [];
   });
   useEffect(() => { localStorage.setItem(storageKey, JSON.stringify(docs)); }, [docs, storageKey]);
   useEffect(() => {

@@ -1,15 +1,23 @@
 import { Link } from "react-router-dom";
-import { ArrowUpRight, Bookmark, Clock, FileText, Sparkles } from "lucide-react";
+import { useEffect, useState } from "react";
+import { ArrowUpRight, Bookmark, Clock, FileText, Sparkles, Wallet } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { useApplications } from "@/contexts/ApplicationContext";
 import { useBookmarks } from "@/contexts/BookmarkContext";
 import { GRANTS } from "@/data/grants";
 import { daysUntil, formatCurrency, formatDate } from "@/lib/utils";
+import { supabase } from "@/lib/supabase";
 
 export default function Overview() {
   const { user, profileCompletion } = useAuth();
   const { apps } = useApplications();
   const { ids } = useBookmarks();
+  const [balance, setBalance] = useState(0);
+  useEffect(() => {
+    if (!supabase || !user) return;
+    supabase.from("wallets").select("balance").eq("user_id", user.id).maybeSingle()
+      .then(({ data }) => setBalance(Number(data?.balance ?? 0)));
+  }, [user]);
 
   const submitted = apps.filter(a => a.status !== "Draft");
   const inReview = apps.filter(a => a.status === "In Review" || a.status === "Submitted").length;
@@ -25,6 +33,7 @@ export default function Overview() {
     { label: "Applications", value: apps.length, icon: FileText, to: "/dashboard/applications" },
     { label: "Pending reviews", value: inReview, icon: Clock, to: "/dashboard/applications" },
     { label: "Awarded", value: formatCurrency(totalAwarded || 0), icon: Sparkles, to: "/dashboard/applications" },
+    { label: "Available balance", value: formatCurrency(balance), icon: Wallet, to: "/dashboard/funding" },
   ];
 
   return (

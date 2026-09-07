@@ -11,12 +11,6 @@ export interface Notif {
   type: "application" | "match" | "deadline" | "system";
 }
 
-const seed: Notif[] = [
-  { id: "n1", title: "New match: 92% for SBIR Phase I", body: "Your organization strongly matches the NSF SBIR Phase I opportunity.", createdAt: new Date(Date.now() - 3600e3).toISOString(), read: false, type: "match" },
-  { id: "n2", title: "Application status: In Review", body: "Your Women-Owned Business Expansion Grant application has entered review.", createdAt: new Date(Date.now() - 86400e3).toISOString(), read: false, type: "application" },
-  { id: "n3", title: "Deadline reminder", body: "SBA Growth Accelerator Grant closes in 5 days.", createdAt: new Date(Date.now() - 2 * 86400e3).toISOString(), read: true, type: "deadline" },
-  { id: "n4", title: "Welcome to Fundbox Grants", body: "Your account has been created. Complete your profile to unlock AI matching.", createdAt: new Date(Date.now() - 7 * 86400e3).toISOString(), read: true, type: "system" },
-];
 
 interface Ctx { items: Notif[]; unread: number; markAllRead: () => void; markRead: (id: string) => void; push: (n: Omit<Notif, "id" | "createdAt" | "read">) => void }
 const C = createContext<Ctx | null>(null);
@@ -26,7 +20,7 @@ export function NotificationProvider({ children }: { children: ReactNode }) {
   const { user } = useAuth();
   const storageKey = `${KEY}-${user?.id ?? "anonymous"}`;
   const [items, setItems] = useState<Notif[]>(() => {
-    if (typeof window === "undefined") return seed;
+    if (typeof window === "undefined") return [];
     const raw = localStorage.getItem(storageKey);
     return raw ? JSON.parse(raw) : [];
   });
