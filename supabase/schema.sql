@@ -32,6 +32,10 @@ $$;
 drop trigger if exists on_auth_user_created_profile on auth.users;
 create trigger on_auth_user_created_profile after insert on auth.users
 for each row execute function public.create_profile_for_user();
+insert into public.profiles (id, name, organization)
+select id, coalesce(raw_user_meta_data ->> 'name', ''), coalesce(raw_user_meta_data ->> 'organization', '')
+from auth.users
+on conflict (id) do nothing;
 
 create table if not exists public.applications (
   id uuid primary key default gen_random_uuid(),
