@@ -1,14 +1,9 @@
 import { Link } from "react-router-dom";
 import { Sparkles } from "lucide-react";
-import { GRANTS } from "@/data/grants";
 import { useAuth } from "@/contexts/AuthContext";
-import { formatCurrency } from "@/lib/utils";
-import { rankGrantMatches } from "@/lib/matching";
 
 export default function Matches() {
-  const { profile, profileCompletion } = useAuth();
-  const orgName = profile.legalName || "your organization";
-  const top = rankGrantMatches(GRANTS, profile).slice(0, 8);
+  const { profileCompletion } = useAuth();
 
   return (
     <div className="space-y-6">
@@ -17,33 +12,12 @@ export default function Matches() {
         <p className="muted text-sm">Recommendations based on your organization profile.</p>
       </div>
 
-      <div className="card p-5">
-        <div className="flex flex-wrap items-center justify-between gap-3">
-          <div>
-            <div className="font-semibold">Profile completeness: {profileCompletion}%</div>
-            <p className="text-sm muted mt-1">Higher completeness improves match accuracy.</p>
-          </div>
-          <Link to="/dashboard/profile" className="btn-outline">Update profile</Link>
-        </div>
-      </div>
-
-      <div className="space-y-3">
-        {top.map(({ grant: g, score, reasons }) => (
-          <Link key={g.id} to={`/grants/${g.id}`} className="card p-5 flex items-center gap-4 hover:shadow-pop transition">
-            <div className="w-14 text-center">
-              <div className="font-display text-xl font-bold text-brand-600 dark:text-brand-400">{score}%</div>
-              <div className="text-[10px] uppercase muted">match</div>
-            </div>
-            <div className="min-w-0 flex-1">
-              <div className="font-semibold">{g.title}</div>
-              <div className="text-sm muted">"{orgName} matches strongly: {reasons.join(" ")}</div>
-            </div>
-            <div className="text-right">
-              <div className="font-medium">{formatCurrency(g.fundingAmount)}</div>
-              <div className="text-xs muted">{g.provider}</div>
-            </div>
-          </Link>
-        ))}
+      <div className="card p-8 text-center">
+        <Sparkles className="h-8 w-8 mx-auto text-brand-600" />
+        <h2 className="font-semibold mt-3">No matches yet</h2>
+        <p className="muted text-sm mt-1">Complete your organization profile to generate personalized grant matches.</p>
+        <p className="text-xs muted mt-2">Profile completion: {profileCompletion}%</p>
+        <Link to="/dashboard/profile" className="btn-primary mt-5">Complete profile</Link>
       </div>
     </div>
   );
