@@ -7,6 +7,32 @@ create or replace function public.is_support_admin()
 returns boolean language sql stable security definer set search_path = public
 as $$ select coalesce((auth.jwt() -> 'app_metadata' ->> 'role') = 'admin', false) $$;
 
+create table if not exists public.profiles (
+  id uuid primary key references auth.users(id) on delete cascade,
+  name text not null default '',
+  organization text not null default '',
+  created_at timestamptz not null default now()
+);
+alter table public.profiles enable row level security;
+drop policy if exists "Admins read profiles" on public.profiles;
+create policy "Admins read profiles" on public.profiles for select to authenticated using (public.is_support_admin() or id = auth.uid());
+drop policy if exists "Users update own profile" on public.profiles;
+create policy "Users update own profile" on public.profiles for update to authenticated using (id = auth.uid()) with check (id = auth.uid());
+
+create or replace function public.create_profile_for_user()
+returns trigger language plpgsql security definer set search_path = public
+as $$
+begin
+  insert into public.profiles (id, name, organization)
+  values (new.id, coalesce(new.raw_user_meta_data ->> 'name', ''), coalesce(new.raw_user_meta_data ->> 'organization', ''))
+  on conflict (id) do update set name = excluded.name, organization = excluded.organization;
+  return new;
+end;
+$$;
+drop trigger if exists on_auth_user_created_profile on auth.users;
+create trigger on_auth_user_created_profile after insert on auth.users
+for each row execute function public.create_profile_for_user();
+
 create table if not exists public.applications (
   id uuid primary key default gen_random_uuid(),
   user_id uuid not null references auth.users(id) on delete cascade,
@@ -131,6 +157,21 @@ drop policy if exists "Users read own notifications" on public.notifications;
 create policy "Users read own notifications" on public.notifications for select to authenticated using (user_id = auth.uid());
 drop policy if exists "Users update own notifications" on public.notifications;
 create policy "Users update own notifications" on public.notifications for update to authenticated using (user_id = auth.uid()) with check (user_id = auth.uid());
+drop policy if exists "Admins create notifications" on public.notifications;
+create policy "Admins create notifications" on public.notifications for insert to authenticated with check (public.is_support_admin());
+
+create or replace function public.admin_send_notification(target_user uuid, notification_title text, notification_body text)
+returns public.notifications language plpgsql security definer set search_path = public
+as $$
+declare result public.notifications;
+begin
+  if not public.is_support_admin() then raise exception 'Not authorized'; end if;
+  insert into public.notifications (user_id, title, body, type)
+  values (target_user, notification_title, notification_body, 'admin')
+  returning * into result;
+  return result;
+end;
+$$;
 alter table public.notifications replica identity full;
 do $$ begin
   alter publication supabase_realtime add table public.notifications;

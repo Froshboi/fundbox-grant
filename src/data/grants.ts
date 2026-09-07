@@ -357,7 +357,7 @@ export const GRANTS: Grant[] = baseGrants.map((g, i) => {
     faq: [
       { q: "Who is eligible to apply?", a: `Applicants must meet the eligibility requirements listed above, including ownership, revenue, and geographic criteria specific to ${g.category} programs.` },
       { q: "Is this grant taxable?", a: "In most cases, grant funds are considered taxable income to the receiving business. Consult a licensed tax professional for guidance specific to your situation." },
-      { q: "Can I apply for multiple grants at once?", a: "Yes. Fundbox Grants encourages qualified applicants to pursue multiple opportunities they match with, provided each program's terms allow it." },
+      { q: "Can I apply for multiple grants at once?", a: "Yes. Get Funded Grants encourages qualified applicants to pursue multiple opportunities they match with, provided each program's terms allow it." },
       { q: "How long does review take?", a: "Review timelines vary by program. Most decisions are issued within 60–90 days of the application deadline." },
     ],
   };

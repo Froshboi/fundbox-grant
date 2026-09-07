@@ -1,7 +1,5 @@
 import { Link } from "react-router-dom";
 import { ArrowRight, Award, Building2, CheckCircle2, FileText, Search, Sparkles, Users } from "lucide-react";
-import { GRANTS, CATEGORIES } from "@/data/grants";
-import { formatCurrency } from "@/lib/utils";
 
 const trust = [
   { label: "Funding Facilitated", value: "$125M+" },
@@ -23,7 +21,6 @@ const audiences = [
 ];
 
 export default function Home() {
-  const featured = GRANTS.slice(0, 3);
   return (
     <div>
       {/* Hero */}
@@ -42,8 +39,8 @@ export default function Home() {
               One profile. Hundreds of matched opportunities. A dashboard for every application.
             </p>
             <div className="mt-8 flex flex-wrap gap-3">
-              <Link to="/grants" className="btn-primary text-base px-5 py-3">
-                <Search className="h-4 w-4" /> Find Grants
+              <Link to="/auth?mode=signup" className="btn-primary text-base px-5 py-3">
+                <Search className="h-4 w-4" /> Start your request
               </Link>
               <Link to="/auth?mode=signup" className="btn-outline text-base px-5 py-3">
                 Apply Now <ArrowRight className="h-4 w-4" />
@@ -67,7 +64,7 @@ export default function Home() {
       {/* Who we serve */}
       <section className="container-page py-16">
         <h2 className="h2">Built for the organizations shaping the American economy</h2>
-        <p className="muted mt-3 max-w-2xl">Fundbox Grants supports the full spectrum of US applicants — from first-time nonprofit founders to established minority-owned enterprises.</p>
+        <p className="muted mt-3 max-w-2xl">Get Funded Grants supports the full spectrum of US applicants — from first-time nonprofit founders to established minority-owned enterprises.</p>
         <div className="mt-8 flex flex-wrap gap-2">
           {audiences.map(a => (
             <span key={a} className="chip bg-ink-100 dark:bg-ink-800 text-ink-800 dark:text-ink-200 px-3 py-1.5">
@@ -77,36 +74,10 @@ export default function Home() {
         </div>
       </section>
 
-      {/* Featured grants */}
       <section className="bg-ink-50 dark:bg-ink-950 border-y border-ink-100 dark:border-ink-800 py-16">
         <div className="container-page">
-          <div className="flex items-end justify-between mb-8">
-            <div>
-              <h2 className="h2">Grants matched to you today</h2>
-              <p className="muted mt-2">A preview of active opportunities in the Fundbox Grants marketplace.</p>
-            </div>
-            <Link to="/grants" className="link hidden sm:inline-flex items-center gap-1">
-              Browse all <ArrowRight className="h-4 w-4" />
-            </Link>
-          </div>
-          <div className="grid md:grid-cols-3 gap-4">
-            {featured.map(g => (
-              <Link key={g.id} to={`/grants/${g.id}`} className="card p-6 hover:shadow-pop transition">
-                <div className="flex justify-between items-start gap-3">
-                  <span className="chip bg-brand-100 text-brand-800 dark:bg-brand-600/20 dark:text-brand-300">{g.category}</span>
-                  <span className="text-xs muted">{g.matchPercentage}% match</span>
-                </div>
-                <div className="font-semibold text-lg mt-3">{g.title}</div>
-                <div className="text-xs muted mt-1">{g.provider}</div>
-                <div className="mt-4 flex items-center justify-between">
-                  <div className="font-display text-xl font-bold text-brand-600 dark:text-brand-400">
-                    {formatCurrency(g.fundingAmount)}
-                  </div>
-                  <span className="text-xs muted">Up to {formatCurrency(g.fundingRangeHigh)}</span>
-                </div>
-              </Link>
-            ))}
-          </div>
+          <h2 className="h2">A clearer path to funding</h2>
+          <p className="muted mt-3 max-w-2xl">Create your profile, upload your documents, and submit a funding request that our team can review directly.</p>
         </div>
       </section>
 
@@ -130,21 +101,6 @@ export default function Home() {
         </div>
       </section>
 
-      {/* Category quick nav */}
-      <section className="bg-ink-50 dark:bg-ink-950 border-t border-ink-100 dark:border-ink-800 py-16">
-        <div className="container-page">
-          <h2 className="h2">Explore by category</h2>
-          <div className="mt-6 grid grid-cols-2 md:grid-cols-5 gap-3">
-            {CATEGORIES.map(c => (
-              <Link key={c} to={`/grants?category=${encodeURIComponent(c)}`}
-                className="card p-4 text-sm font-medium hover:border-brand-500 hover:text-brand-600 dark:hover:text-brand-400 transition">
-                {c}
-              </Link>
-            ))}
-          </div>
-        </div>
-      </section>
-
       {/* CTA */}
       <section className="container-page py-20">
         <div className="rounded-2xl bg-ink-900 dark:bg-brand-700 text-white p-10 md:p-14 relative overflow-hidden">
@@ -153,7 +109,7 @@ export default function Home() {
             <p className="mt-3 text-white/80">Create a free account, complete your profile, and get matched to opportunities within minutes.</p>
             <div className="mt-6 flex flex-wrap gap-3">
               <Link to="/auth?mode=signup" className="btn bg-white text-ink-900 hover:bg-ink-100">Create free account</Link>
-              <Link to="/grants" className="btn border border-white/30 text-white hover:bg-white/10">Browse grants</Link>
+              <Link to="/support" className="btn border border-white/30 text-white hover:bg-white/10">Talk to support</Link>
             </div>
           </div>
         </div>

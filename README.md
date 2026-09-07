@@ -1,6 +1,6 @@
-# Fundbox Grants — US Grant Discovery & Management Platform
+# Get Funded Grants — US Grant Discovery & Management Platform
 
-A production-quality **Fundbox Grants Ltd** grant discovery, application management, and funding assistance platform.
+A production-quality **Get Funded Grants** grant discovery, application management, and funding assistance platform.
 
 > Production authentication, support messaging, and document storage are provided by Supabase.
 
@@ -108,7 +108,7 @@ The design system, routing, and components are backend-agnostic.
 ## Production setup
 
 1. Create a Supabase project and enable Email authentication.
-2. Run [`supabase/schema.sql`](C:/Users/HP/Desktop/fundbox-grants.worktrees/full-functionality-auth-upload-ai/supabase/schema.sql) in the Supabase SQL Editor. It creates the private bucket, document metadata table, and RLS policies.
+2. Run [`supabase/schema.sql`](C:/Users/HP/Desktop/get-funded-grants.worktrees/full-functionality-auth-upload-ai/supabase/schema.sql) in the Supabase SQL Editor. It creates the private bucket, document metadata table, and RLS policies.
 3. Add `VITE_SUPABASE_URL` and `VITE_SUPABASE_ANON_KEY` from `.env.example` to your deployment environment.
 4. In Supabase Auth settings, configure your production Site URL and redirect URLs, and choose whether email confirmation is required.
 5. Set an admin user's `app_metadata.role` to `admin` from a trusted server or Supabase dashboard; never let the browser assign admin roles.
@@ -118,8 +118,8 @@ The AI Matches screen uses a deterministic, explainable ranking algorithm over t
 
 ## Legal & Operational Context (US)
 
-Fundbox Grants Ltd is designed as a **grant discovery and application management platform**, not a financial institution. Depending on the operating model chosen (marketplace, consulting, or grant administration), the company may need to comply with state business registration, US privacy laws (CCPA/CPRA, VCDPA, etc.), applicant verification procedures, and AML/KYC processes if funds are handled directly. See `src/pages/legal/` for the customer-facing document set.
+Get Funded Grants is designed as a **grant discovery and application management platform**, not a financial institution. Depending on the operating model chosen (marketplace, consulting, or grant administration), the company may need to comply with state business registration, US privacy laws (CCPA/CPRA, VCDPA, etc.), applicant verification procedures, and AML/KYC processes if funds are handled directly. See `src/pages/legal/` for the customer-facing document set.
 
 ---
 
-© Fundbox Grants Ltd.
+© Get Funded Grants.

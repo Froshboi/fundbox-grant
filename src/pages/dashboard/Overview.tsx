@@ -4,8 +4,7 @@ import { ArrowUpRight, Bookmark, Clock, FileText, Sparkles, Wallet } from "lucid
 import { useAuth } from "@/contexts/AuthContext";
 import { useApplications } from "@/contexts/ApplicationContext";
 import { useBookmarks } from "@/contexts/BookmarkContext";
-import { GRANTS } from "@/data/grants";
-import { daysUntil, formatCurrency, formatDate } from "@/lib/utils";
+import { formatCurrency, formatDate } from "@/lib/utils";
 import { supabase } from "@/lib/supabase";
 
 export default function Overview() {
@@ -23,11 +22,6 @@ export default function Overview() {
   const inReview = apps.filter(a => a.status === "In Review" || a.status === "Submitted").length;
   const approved = apps.filter(a => a.status === "Approved");
   const totalAwarded = approved.reduce((s, a) => s + a.amountRequested, 0);
-  const upcoming = GRANTS
-    .filter(g => ids.includes(g.id) || g.matchPercentage > 85)
-    .sort((a, b) => new Date(a.deadline).getTime() - new Date(b.deadline).getTime())
-    .slice(0, 4);
-
   const widgets = [
     { label: "Saved grants", value: ids.length, icon: Bookmark, to: "/dashboard/saved" },
     { label: "Applications", value: apps.length, icon: FileText, to: "/dashboard/applications" },
@@ -92,23 +86,6 @@ export default function Overview() {
           </div>
         </div>
 
-        <div className="card p-5">
-          <div className="flex items-center justify-between">
-            <div className="font-semibold">Upcoming deadlines</div>
-            <Link to="/grants" className="link text-sm">Browse grants</Link>
-          </div>
-          <div className="mt-3 divide-y divide-ink-100 dark:divide-ink-800">
-            {upcoming.map(g => (
-              <Link to={`/grants/${g.id}`} key={g.id} className="py-3 flex items-center justify-between gap-3 group">
-                <div className="min-w-0">
-                  <div className="text-sm font-medium truncate group-hover:text-brand-600">{g.title}</div>
-                  <div className="text-xs muted">{formatCurrency(g.fundingAmount)} · {formatDate(g.deadline)}</div>
-                </div>
-                <span className="chip bg-amber-100 text-amber-800 dark:bg-amber-500/20 dark:text-amber-300 text-xs">{daysUntil(g.deadline)}d</span>
-              </Link>
-            ))}
-          </div>
-        </div>
       </div>
     </div>
   );

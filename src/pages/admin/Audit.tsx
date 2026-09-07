@@ -1,12 +1,12 @@
 const logs = [
-  { t: "2m ago", who: "admin@fundboxgrants.com", action: "Approved application app-005 (Amber Grant for Women)", ip: "10.4.19.22" },
-  { t: "17m ago", who: "reviewer1@fundboxgrants.com", action: "Moved app-001 to In Review", ip: "10.4.19.31" },
-  { t: "1h ago", who: "admin@fundboxgrants.com", action: "Created grant program 'Small Manufacturer Modernization Grant'", ip: "10.4.19.22" },
+  { t: "2m ago", who: "admin@getfundedgrants.com", action: "Approved application app-005 (Amber Grant for Women)", ip: "10.4.19.22" },
+  { t: "17m ago", who: "reviewer1@getfundedgrants.com", action: "Moved app-001 to In Review", ip: "10.4.19.31" },
+  { t: "1h ago", who: "admin@getfundedgrants.com", action: "Created grant program 'Small Manufacturer Modernization Grant'", ip: "10.4.19.22" },
   { t: "3h ago", who: "system", action: "Nightly AI matching batch completed (12,483 profiles)", ip: "internal" },
-  { t: "5h ago", who: "compliance@fundboxgrants.com", action: "Verified VOSB certification for Overwatch Logistics", ip: "10.4.19.44" },
-  { t: "yesterday", who: "admin@fundboxgrants.com", action: "Published article 'DOE Announces $2.5B for Small Manufacturer Emissions Reduction'", ip: "10.4.19.22" },
+  { t: "5h ago", who: "compliance@getfundedgrants.com", action: "Verified VOSB certification for Overwatch Logistics", ip: "10.4.19.44" },
+  { t: "yesterday", who: "admin@getfundedgrants.com", action: "Published article 'DOE Announces $2.5B for Small Manufacturer Emissions Reduction'", ip: "10.4.19.22" },
   { t: "yesterday", who: "system", action: "Sent 4,218 deadline reminder emails", ip: "internal" },
-  { t: "2 days ago", who: "admin@fundboxgrants.com", action: "Suspended applicant u-01008 pending compliance review", ip: "10.4.19.22" },
+  { t: "2 days ago", who: "admin@getfundedgrants.com", action: "Suspended applicant u-01008 pending compliance review", ip: "10.4.19.22" },
 ];
 
 export default function AdminAudit() {

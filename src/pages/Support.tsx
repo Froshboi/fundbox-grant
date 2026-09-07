@@ -4,7 +4,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/lib/supabase";
 
 const faqs = [
-  { q: "Is Fundbox Grants a lender?", a: "No. Fundbox Grants is a grant discovery and application management platform — not a lender or financial institution." },
+  { q: "Is Get Funded Grants a lender?", a: "No. Get Funded Grants is a grant discovery and application management platform — not a lender or financial institution." },
   { q: "How does AI matching work?", a: "We score your organization profile against each grant program's stated eligibility, funding priorities, geography, and past awardee patterns to produce a match percentage." },
   { q: "How much does it cost?", a: "Creating an account and browsing the marketplace is free. Premium features for teams and grant administrators are available." },
   { q: "Do you write applications for us?", a: "Our platform provides templates and guidance. Full-service grant writing is available through vetted partner consultants." },
@@ -18,7 +18,7 @@ export default function Support() {
   const [tab, setTab] = useState<"help" | "chat" | "tickets">("help");
   const { user } = useAuth();
   const [messages, setMessages] = useState<{ role: "user" | "bot"; text: string }[]>([
-    { role: "bot", text: "Hi — I'm the Fundbox Grants assistant. Ask me anything about grants, applications, or your account." },
+    { role: "bot", text: "Hi — I'm the Get Funded Grants assistant. Ask me anything about grants, applications, or your account." },
   ]);
   const [input, setInput] = useState("");
   const [tickets, setTickets] = useState<Ticket[]>([]);
@@ -118,7 +118,7 @@ export default function Support() {
           <div className="card p-5 text-sm flex flex-col sm:flex-row gap-4 items-start sm:items-center justify-between">
             <div>
               <div className="font-semibold">Still need help?</div>
-              <div className="muted">Reach us at <a className="link" href="mailto:support@fundboxgrants.com">support@fundboxgrants.com</a></div>
+              <div className="muted">Reach us at <a className="link" href="mailto:support@getfundedgrants.com">support@getfundedgrants.com</a></div>
             </div>
             <div className="flex gap-2">
               <a className="btn-outline" href="tel:+18005551234"><Phone className="h-4 w-4" /> 1-800-555-1234</a>

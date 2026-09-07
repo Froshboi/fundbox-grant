@@ -1,6 +1,6 @@
 {
-  "name": "Fundbox Grants",
-  "short_name": "Fundbox",
+  "name": "Get Funded Grants",
+  "short_name": "Get Funded",
   "description": "Grant discovery and application management platform.",
   "start_url": "/",
   "display": "standalone",

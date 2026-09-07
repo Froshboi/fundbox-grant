@@ -7,7 +7,7 @@ export default function SuccessStories() {
     <div className="container-page py-12">
       <div className="max-w-2xl">
         <h1 className="h2">Success Stories</h1>
-        <p className="muted mt-2">Real organizations funded through the Fundbox Grants platform.</p>
+        <p className="muted mt-2">Real organizations funded through the Get Funded Grants platform.</p>
       </div>
       <div className="mt-10 grid gap-6 md:grid-cols-2">
         {STORIES.map(s => (

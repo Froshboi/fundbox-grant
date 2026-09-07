@@ -5,8 +5,6 @@ import { DashboardLayout } from "./components/layout/DashboardLayout";
 import { AdminLayout } from "./components/layout/AdminLayout";
 
 import Home from "./pages/Home";
-import Marketplace from "./pages/Marketplace";
-import GrantDetails from "./pages/GrantDetails";
 import Auth from "./pages/Auth";
 import Support from "./pages/Support";
 import SuccessStories from "./pages/SuccessStories";
@@ -46,8 +44,6 @@ export default function App() {
       <Routes>
         <Route element={<PublicLayout />}>
           <Route path="/" element={<Home />} />
-          <Route path="/grants" element={<Marketplace />} />
-          <Route path="/grants/:id" element={<GrantDetails />} />
           <Route path="/resources" element={<Resources />} />
           <Route path="/resources/:slug" element={<ArticleDetail />} />
           <Route path="/success-stories" element={<SuccessStories />} />

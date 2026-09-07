@@ -8,7 +8,6 @@ import { useNotifications } from "@/contexts/NotificationContext";
 import { cn } from "@/lib/utils";
 
 const nav = [
-  { to: "/grants", label: "Grants" },
   { to: "/resources", label: "Resources" },
   { to: "/success-stories", label: "Success Stories" },
   { to: "/support", label: "Support" },

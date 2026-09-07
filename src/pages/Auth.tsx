@@ -41,7 +41,10 @@ export default function Auth() {
       }
       nav("/dashboard");
     } catch (e: any) {
-      setErr(e?.message ?? "Something went wrong");
+      const message = String(e?.message ?? "");
+      setErr(message.toLowerCase().includes("rate") || message.toLowerCase().includes("email rate")
+        ? "Too many emails were requested. Please wait a few minutes and try again."
+        : message || "Something went wrong");
     } finally { setLoading(false); }
   }
 
@@ -65,7 +68,7 @@ export default function Auth() {
           <div className="md:hidden mb-8"><Logo /></div>
           <h1 className="font-display text-2xl font-bold">{mode === "signin" ? "Welcome back" : mode === "signup" ? "Create your account" : mode === "forgot" ? "Reset your password" : "Choose a new password"}</h1>
           <p className="muted text-sm mt-1">
-            {mode === "signin" ? "Sign in to your Fundbox Grants dashboard." : mode === "signup" ? "Create your account to get started." : "Enter your email to receive a secure reset link."}
+            {mode === "signin" ? "Sign in to your Get Funded Grants dashboard." : mode === "signup" ? "Create your account to get started." : "Enter your email to receive a secure reset link."}
           </p>
           <form onSubmit={submit} className="mt-6 space-y-4">
             {mode === "signup" && (

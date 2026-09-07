@@ -14,7 +14,7 @@ export function Footer() {
         <div>
           <div className="text-sm font-semibold mb-3">Platform</div>
           <ul className="space-y-2 text-sm muted">
-            <li><Link to="/grants">Grant Marketplace</Link></li>
+            <li><Link to="/auth?mode=signup">Get started</Link></li>
             <li><Link to="/dashboard">Applicant Dashboard</Link></li>
             <li><Link to="/success-stories">Success Stories</Link></li>
             <li><Link to="/resources">Resource Center</Link></li>
@@ -39,8 +39,8 @@ export function Footer() {
         </div>
       </div>
       <div className="container-page py-4 border-t border-ink-100 dark:border-ink-800 text-xs muted flex flex-col sm:flex-row justify-between gap-2">
-        <div>© {new Date().getFullYear()} Fundbox Grants Ltd. All rights reserved.</div>
-        <div>Fundbox Grants Ltd is a grant discovery and application management platform — not a lender.</div>
+        <div>© {new Date().getFullYear()} Get Funded Grants. All rights reserved.</div>
+        <div>Get Funded Grants is a grant discovery and application management platform — not a lender.</div>
       </div>
     </footer>
   );

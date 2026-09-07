@@ -16,8 +16,8 @@ export const STORIES: SuccessStory[] = [
   {
     id: "s1", organization: "Meridian Robotics", founder: "Elena Vasquez",
     location: "Austin, TX", category: "Technology", grantAwarded: "SBIR Phase I", amount: 275000, year: 2024,
-    quote: "Fundbox Grants surfaced the SBIR opportunity our team would have missed, and their document vault cut our submission time in half.",
-    story: "Meridian Robotics develops autonomous inspection drones for wind turbine operators. After a 90-day sprint through Fundbox Grants' matching engine, the team secured NSF SBIR Phase I funding and hired their first three engineers.",
+    quote: "Get Funded Grants surfaced the SBIR opportunity our team would have missed, and their document vault cut our submission time in half.",
+    story: "Meridian Robotics develops autonomous inspection drones for wind turbine operators. After a 90-day sprint through Get Funded Grants' matching engine, the team secured NSF SBIR Phase I funding and hired their first three engineers.",
     outcomes: ["Hired 3 senior engineers", "Signed pilot with 2 utilities", "Progressed to SBIR Phase II"],
   },
   {
@@ -37,7 +37,7 @@ export const STORIES: SuccessStory[] = [
   {
     id: "s4", organization: "Overwatch Logistics", founder: "Captain David Klein (Ret.)",
     location: "Norfolk, VA", category: "Veteran", grantAwarded: "VOSB Contract Readiness Grant", amount: 40000, year: 2024,
-    quote: "Fundbox Grants matched us with the certification pathway that opened federal contracts within a year.",
+    quote: "Get Funded Grants matched us with the certification pathway that opened federal contracts within a year.",
     story: "Overwatch Logistics is a veteran-owned last-mile delivery company serving federal facilities. The grant funded VOSB certification, capability statement design, and past-performance documentation.",
     outcomes: ["Secured $2.1M in federal contracts", "Grew fleet by 140%", "Hired 18 veterans"],
   },
@@ -51,7 +51,7 @@ export const STORIES: SuccessStory[] = [
   {
     id: "s6", organization: "Cascade Solar Co-op", founder: "Julian Park",
     location: "Portland, OR", category: "Green Energy", grantAwarded: "Green Energy Innovation Grant", amount: 250000, year: 2024,
-    quote: "The team at Fundbox Grants helped us frame our pilot in language DOE reviewers respond to.",
+    quote: "The team at Get Funded Grants helped us frame our pilot in language DOE reviewers respond to.",
     story: "Cascade Solar Co-op develops community-owned rooftop solar installations. DOE funding supported a pilot in three low-to-moderate income neighborhoods.",
     outcomes: ["Installed 1.4 MW capacity", "Cut member energy bills 38%", "Trained 20 local installers"],
   },

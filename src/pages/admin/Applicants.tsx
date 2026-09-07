@@ -1,45 +1,40 @@
-import { useState } from "react";
+import { useEffect, useMemo, useState } from "react";
+import { supabase } from "@/lib/supabase";
 
-interface Applicant { id: string; name: string; org: string; email: string; state: string; industry: string; apps: number; status: "Active" | "Suspended" | "Pending KYC" }
-
-const seed: Applicant[] = [
-  { id: "u-01001", name: "Jamie Rivera", org: "Rivera Robotics LLC", email: "jamie@riverarobotics.com", state: "TX", industry: "Technology", apps: 5, status: "Active" },
-  { id: "u-01002", name: "Ayana Brooks", org: "The Rooted Kitchen", email: "ayana@rootedkitchen.com", state: "MI", industry: "Food & Beverage", apps: 3, status: "Active" },
-  { id: "u-01003", name: "Marcus Reyes", org: "Sundial Learning", email: "marcus@sundiallearning.org", state: "CA", industry: "Education", apps: 4, status: "Active" },
-  { id: "u-01004", name: "Elena Vasquez", org: "Meridian Robotics", email: "elena@meridianrobotics.com", state: "TX", industry: "Technology", apps: 7, status: "Active" },
-  { id: "u-01005", name: "David Klein", org: "Overwatch Logistics", email: "david@overwatchlogistics.com", state: "VA", industry: "Logistics", apps: 6, status: "Active" },
-  { id: "u-01006", name: "Naomi Whitehorse", org: "Prairie Community Health", email: "naomi@prairiehealth.org", state: "SD", industry: "Healthcare", apps: 2, status: "Pending KYC" },
-  { id: "u-01007", name: "Julian Park", org: "Cascade Solar Co-op", email: "julian@cascadesolar.coop", state: "OR", industry: "Clean Energy", apps: 5, status: "Active" },
-  { id: "u-01008", name: "Priya Menon", org: "Nightingale Biosciences", email: "priya@nightingalebio.com", state: "MA", industry: "Healthcare", apps: 3, status: "Suspended" },
-];
+interface Applicant { id: string; name: string; organization: string; created_at: string }
 
 export default function AdminApplicants() {
   const [q, setQ] = useState("");
-  const list = seed.filter(a => !q || (a.name + a.org + a.email).toLowerCase().includes(q.toLowerCase()));
+  const [list, setList] = useState<Applicant[]>([]);
+  const [message, setMessage] = useState("");
+  const [error, setError] = useState<string | null>(null);
+  useEffect(() => {
+    if (!supabase) return;
+    supabase.from("profiles").select("id,name,organization,created_at").order("created_at", { ascending: false })
+      .then(({ data, error: queryError }) => queryError ? setError(queryError.message) : setList(data ?? []));
+  }, []);
+  const filtered = useMemo(() => list.filter(a => `${a.name} ${a.organization}`.toLowerCase().includes(q.toLowerCase())), [list, q]);
+  async function notify(userId: string) {
+    if (!supabase || !message.trim()) return;
+    const { error: notifyError } = await supabase.rpc("admin_send_notification", {
+      target_user: userId, notification_title: "Message from Get Funded Grants", notification_body: message.trim(),
+    });
+    if (notifyError) setError(notifyError.message);
+    else setMessage("");
+  }
   return (
     <div className="space-y-4">
       <div className="flex flex-wrap items-center justify-between gap-3">
-        <div><h1 className="h3">Applicant Management</h1><p className="muted text-sm">{seed.length} total applicants across US states.</p></div>
-        <input className="input max-w-xs" placeholder="Search name, org, email..." value={q} onChange={e => setQ(e.target.value)} />
+        <div><h1 className="h3">Applicant Management</h1><p className="muted text-sm">{list.length} registered accounts.</p></div>
+        <input className="input max-w-xs" placeholder="Search name or organization..." value={q} onChange={e => setQ(e.target.value)} />
       </div>
+      {error && <div className="text-sm text-red-600">{error}</div>}
+      <div className="card p-4 flex gap-2"><input className="input" value={message} onChange={e => setMessage(e.target.value)} placeholder="Notification message for a selected user" /><span className="text-xs muted self-center">Choose Send below</span></div>
       <div className="card overflow-x-auto">
-        <table className="w-full text-sm min-w-[720px]">
-          <thead className="bg-ink-50 dark:bg-ink-900 text-xs uppercase muted">
-            <tr><th className="text-left p-3">Applicant</th><th className="text-left p-3">Email</th><th className="text-left p-3">State</th><th className="text-left p-3">Industry</th><th className="text-left p-3">Apps</th><th className="text-left p-3">Status</th></tr>
-          </thead>
-          <tbody className="divide-y divide-ink-100 dark:divide-ink-800">
-            {list.map(a => (
-              <tr key={a.id}>
-                <td className="p-3"><div className="font-medium">{a.name}</div><div className="text-xs muted">{a.org} · {a.id}</div></td>
-                <td className="p-3 text-xs">{a.email}</td>
-                <td className="p-3 text-xs">{a.state}</td>
-                <td className="p-3 text-xs">{a.industry}</td>
-                <td className="p-3 text-xs">{a.apps}</td>
-                <td className="p-3"><span className={"chip " + (a.status === "Active" ? "bg-emerald-100 text-emerald-800 dark:bg-emerald-500/20 dark:text-emerald-300" : a.status === "Suspended" ? "bg-red-100 text-red-800 dark:bg-red-500/20 dark:text-red-300" : "bg-amber-100 text-amber-800 dark:bg-amber-500/20 dark:text-amber-300")}>{a.status}</span></td>
-              </tr>
-            ))}
-          </tbody>
+        <table className="w-full text-sm min-w-[640px]"><thead className="bg-ink-50 dark:bg-ink-900 text-xs uppercase muted"><tr><th className="text-left p-3">Applicant</th><th className="text-left p-3">Joined</th><th className="text-left p-3">Action</th></tr></thead>
+          <tbody className="divide-y divide-ink-100 dark:divide-ink-800">{filtered.map(applicant => <tr key={applicant.id}><td className="p-3"><div className="font-medium">{applicant.name || "Unnamed applicant"}</div><div className="text-xs muted">{applicant.organization || "No organization provided"}</div></td><td className="p-3 text-xs">{new Date(applicant.created_at).toLocaleDateString()}</td><td className="p-3"><button className="btn-outline py-1.5" onClick={() => void notify(applicant.id)}>Send notification</button></td></tr>)}</tbody>
         </table>
+        {filtered.length === 0 && <div className="p-5 text-sm muted">No registered accounts match your search.</div>}
       </div>
     </div>
   );
