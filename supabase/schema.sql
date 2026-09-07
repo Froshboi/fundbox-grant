@@ -105,15 +105,25 @@ alter table public.wallets enable row level security;
 alter table public.wallet_transactions enable row level security;
 alter table public.payout_accounts enable row level security;
 alter table public.withdrawal_requests enable row level security;
+drop policy if exists "Users read own wallet" on public.wallets;
 create policy "Users read own wallet" on public.wallets for select to authenticated using (user_id = auth.uid() or public.is_support_admin());
+drop policy if exists "Admins manage wallets" on public.wallets;
 create policy "Admins manage wallets" on public.wallets for all to authenticated using (public.is_support_admin()) with check (public.is_support_admin());
+drop policy if exists "Users read own transactions" on public.wallet_transactions;
 create policy "Users read own transactions" on public.wallet_transactions for select to authenticated using (user_id = auth.uid() or public.is_support_admin());
+drop policy if exists "Admins create transactions" on public.wallet_transactions;
 create policy "Admins create transactions" on public.wallet_transactions for insert to authenticated with check (public.is_support_admin());
+drop policy if exists "Users manage own payout account" on public.payout_accounts;
 create policy "Users manage own payout account" on public.payout_accounts for select to authenticated using (user_id = auth.uid() or public.is_support_admin());
+drop policy if exists "Users create own payout account" on public.payout_accounts;
 create policy "Users create own payout account" on public.payout_accounts for insert to authenticated with check (user_id = auth.uid());
+drop policy if exists "Admins update payout account" on public.payout_accounts;
 create policy "Admins update payout account" on public.payout_accounts for update to authenticated using (public.is_support_admin()) with check (public.is_support_admin());
+drop policy if exists "Users read/create withdrawals" on public.withdrawal_requests;
 create policy "Users read/create withdrawals" on public.withdrawal_requests for select to authenticated using (user_id = auth.uid() or public.is_support_admin());
+drop policy if exists "Users create withdrawals" on public.withdrawal_requests;
 create policy "Users create withdrawals" on public.withdrawal_requests for insert to authenticated with check (user_id = auth.uid());
+drop policy if exists "Admins manage withdrawals" on public.withdrawal_requests;
 create policy "Admins manage withdrawals" on public.withdrawal_requests for update to authenticated using (public.is_support_admin()) with check (public.is_support_admin());
 
 create or replace function public.admin_adjust_balance(target_user uuid, adjustment numeric, transaction_memo text)
