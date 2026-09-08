@@ -9,10 +9,12 @@ as $$ select coalesce((auth.jwt() -> 'app_metadata' ->> 'role') = 'admin', false
 
 create table if not exists public.profiles (
   id uuid primary key references auth.users(id) on delete cascade,
+  email text not null default '',
   name text not null default '',
   organization text not null default '',
   created_at timestamptz not null default now()
 );
+alter table public.profiles add column if not exists email text not null default '';
 alter table public.profiles enable row level security;
 drop policy if exists "Admins read profiles" on public.profiles;
 create policy "Admins read profiles" on public.profiles for select to authenticated using (public.is_support_admin() or id = auth.uid());
@@ -23,8 +25,8 @@ create or replace function public.create_profile_for_user()
 returns trigger language plpgsql security definer set search_path = public
 as $$
 begin
-  insert into public.profiles (id, name, organization)
-  values (new.id, coalesce(new.raw_user_meta_data ->> 'name', ''), coalesce(new.raw_user_meta_data ->> 'organization', ''))
+  insert into public.profiles (id, email, name, organization)
+  values (new.id, coalesce(new.email, ''), coalesce(new.raw_user_meta_data ->> 'name', ''), coalesce(new.raw_user_meta_data ->> 'organization', ''))
   on conflict (id) do update set name = excluded.name, organization = excluded.organization;
   return new;
 end;
@@ -32,8 +34,8 @@ $$;
 drop trigger if exists on_auth_user_created_profile on auth.users;
 create trigger on_auth_user_created_profile after insert on auth.users
 for each row execute function public.create_profile_for_user();
-insert into public.profiles (id, name, organization)
-select id, coalesce(raw_user_meta_data ->> 'name', ''), coalesce(raw_user_meta_data ->> 'organization', '')
+insert into public.profiles (id, email, name, organization)
+select id, coalesce(email, ''), coalesce(raw_user_meta_data ->> 'name', ''), coalesce(raw_user_meta_data ->> 'organization', '')
 from auth.users
 on conflict (id) do nothing;
 
