@@ -1,7 +1,7 @@
 import { NavLink, Outlet, Navigate } from "react-router-dom";
 import { Header } from "./Header";
 import { useAuth } from "@/contexts/AuthContext";
-import { Bookmark, FileText, Folder, LayoutDashboard, Bell, User, Sparkles, Wallet } from "lucide-react";
+import { Bookmark, FileText, Folder, LayoutDashboard, Bell, User, Sparkles, Wallet, ShieldCheck } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 const items = [
@@ -33,6 +33,15 @@ export function DashboardLayout() {
                 <i.icon className="h-4 w-4" /> {i.label}
               </NavLink>
             ))}
+            {user.role === "admin" && (
+              <NavLink to="/admin"
+                className={({ isActive }) => cn(
+                  "flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium text-brand-700 dark:text-brand-300 hover:bg-brand-50 dark:hover:bg-brand-600/10",
+                  isActive && "bg-brand-50 dark:bg-brand-600/10"
+                )}>
+                <ShieldCheck className="h-4 w-4" /> Admin
+              </NavLink>
+            )}
           </nav>
         </aside>
         <main className="min-w-0"><Outlet /></main>
