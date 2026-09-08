@@ -9,6 +9,7 @@ export default function Auth() {
   const [mode, setMode] = useState<"signin" | "signup" | "forgot" | "reset">(params.get("mode") === "signup" ? "signup" : params.get("mode") === "reset" ? "reset" : "signin");
   const { user, login, signup, resetPassword } = useAuth();
   const [loading, setLoading] = useState(false);
+  const [cooldown, setCooldown] = useState(0);
   const [err, setErr] = useState<string | null>(null);
   const nav = useNavigate();
 
@@ -16,6 +17,7 @@ export default function Auth() {
 
   async function submit(e: FormEvent<HTMLFormElement>) {
     e.preventDefault();
+    if (cooldown > 0) return;
     setErr(null); setLoading(true);
     const fd = new FormData(e.currentTarget);
     try {
@@ -29,6 +31,16 @@ export default function Auth() {
       } else if (mode === "forgot") {
         await resetPassword(String(fd.get("email")));
         setErr("If an account exists for that email, a reset link has been sent.");
+        setCooldown(7);
+        const timer = window.setInterval(() => {
+          setCooldown(current => {
+            if (current <= 1) {
+              window.clearInterval(timer);
+              return 0;
+            }
+            return current - 1;
+          });
+        }, 1000);
         return;
       } else if (mode === "reset") {
         if (!supabase) throw new Error("Authentication is not configured.");
@@ -42,9 +54,9 @@ export default function Auth() {
       nav("/dashboard");
     } catch (e: any) {
       const message = String(e?.message ?? "");
-      setErr(message.toLowerCase().includes("rate") || message.toLowerCase().includes("email rate")
-        ? "Too many emails were requested. Please wait a few minutes and try again."
-        : message || "Something went wrong");
+      const rateLimited = message.toLowerCase().includes("rate") || message.toLowerCase().includes("email rate") || message.toLowerCase().includes("6 seconds");
+      setErr(rateLimited ? "Please wait a few seconds before requesting another email." : message || "Something went wrong");
+      if (rateLimited) setCooldown(7);
     } finally { setLoading(false); }
   }
 
@@ -93,7 +105,7 @@ export default function Auth() {
             </div>}
             {err && <div className="text-sm text-red-600">{err}</div>}
             <button className="btn-primary w-full" disabled={loading}>
-              {loading ? "Please wait..." : mode === "signin" ? "Sign in" : mode === "signup" ? "Create account" : mode === "forgot" ? "Send reset link" : "Update password"}
+              {loading ? "Please wait..." : mode === "forgot" && cooldown > 0 ? `Try again in ${cooldown}s` : mode === "signin" ? "Sign in" : mode === "signup" ? "Create account" : mode === "forgot" ? "Send reset link" : "Update password"}
             </button>
           </form>
           <div className="text-sm muted mt-6">
