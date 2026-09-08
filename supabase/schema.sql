@@ -85,7 +85,8 @@ create table if not exists public.payout_accounts (
   provider text not null default 'pending_provider_setup',
   provider_account_id text,
   bank_name text,
-  account_last4 text not null check (account_last4 ~ '^[0-9]{4}$'),
+  account_last4 text check (account_last4 is null or account_last4 ~ '^[0-9]{4}$'),
+  cash_tag text,
   status text not null default 'Pending' check (status in ('Pending','Approved','Rejected')),
   created_at timestamptz not null default now(),
   updated_at timestamptz not null default now()
@@ -95,12 +96,17 @@ create table if not exists public.withdrawal_requests (
   user_id uuid not null references auth.users(id) on delete cascade,
   amount numeric(12,2) not null check (amount > 0),
   status text not null default 'Pending' check (status in ('Pending','Approved','Rejected','Paid')),
-  payout_account_last4 text not null,
+  payout_account_last4 text,
+  payout_cash_tag text,
   admin_note text,
   created_at timestamptz not null default now(),
   reviewed_at timestamptz,
   reviewed_by uuid references auth.users(id)
 );
+alter table public.payout_accounts add column if not exists cash_tag text;
+alter table public.payout_accounts alter column account_last4 drop not null;
+alter table public.withdrawal_requests add column if not exists payout_cash_tag text;
+alter table public.withdrawal_requests alter column payout_account_last4 drop not null;
 alter table public.wallets enable row level security;
 alter table public.wallet_transactions enable row level security;
 alter table public.payout_accounts enable row level security;
